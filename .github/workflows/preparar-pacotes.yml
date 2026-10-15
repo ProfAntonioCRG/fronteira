@@ -2,7 +2,7 @@ name: Preparar pacotes da Fronteira
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
