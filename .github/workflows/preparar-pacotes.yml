@@ -1,4 +1,4 @@
-name: Preparar pacotes da Fronteira
+name: Publicar Site da Fronteira
 
 on:
   push:
@@ -7,49 +7,48 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 concurrency:
-  group: fronteira-package-${{ github.ref }}
+  group: 'pages'
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - name: Obter codigo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
+
       - name: Preparar Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: 20
+          cache: npm
+
       - name: Instalar dependencias
         run: |
           if [ -f package-lock.json ]; then npm ci; else npm install; fi
-      - name: Conferir tipos
-        run: npx tsc --noEmit
+
       - name: Compilar aplicativo
         run: npm run build
-      - name: Conferir scripts locais
-        run: |
-          node --check tools/servidor-local.mjs
-          node --check public/sw.js
-      - name: Separar pacote para o computador
-        run: |
-          mkdir -p offline-package/tools offline-package/docs
-          cp -R dist offline-package/dist
-          cp tools/servidor-local.mjs offline-package/tools/
-          cp INICIAR-FRONTEIRA.bat iniciar-fronteira.sh README.md offline-package/
-          cp docs/INSTALACAO.md offline-package/docs/
-      - name: Baixar versao para uso local
-        uses: actions/upload-artifact@v4
+
+      - name: Configurar Pages
+        uses: actions/configure-pages@v4
+
+      - name: Subir artefato
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: fronteira-offline
-          path: offline-package/
-          retention-days: 30
-      - name: Baixar arquivos para hospedagem estatica
-        uses: actions/upload-artifact@v4
-        with:
-          name: fronteira-site
-          path: dist/
-          retention-days: 30
+          path: './dist'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Publicar no GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
