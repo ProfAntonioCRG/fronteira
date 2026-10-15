@@ -91,3 +91,4 @@ Os testes em `tests/atendimento-tv.spec.ts` cobrem duas janelas, nome e número,
 
 Prepare o Chromium com `npx playwright install --with-deps chromium` e execute `npx playwright test`. Para testar a versão compilada no servidor local, rode `npm run build` e depois `PW_PRODUCTION=1 npx playwright test` em um terminal compatível. A fala é simulada nos testes para conferir o texto enviado ao navegador; a voz e a impressora físicas devem ser verificadas na loja.
 .
+.
