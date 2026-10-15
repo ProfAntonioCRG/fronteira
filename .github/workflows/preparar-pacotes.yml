@@ -1,0 +1,55 @@
+name: Preparar pacotes da Fronteira
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fronteira-package-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Obter codigo
+        uses: actions/checkout@v6
+      - name: Preparar Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Instalar dependencias
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - name: Conferir tipos
+        run: npx tsc --noEmit
+      - name: Compilar aplicativo
+        run: npm run build
+      - name: Conferir scripts locais
+        run: |
+          node --check tools/servidor-local.mjs
+          node --check public/sw.js
+      - name: Separar pacote para o computador
+        run: |
+          mkdir -p offline-package/tools offline-package/docs
+          cp -R dist offline-package/dist
+          cp tools/servidor-local.mjs offline-package/tools/
+          cp INICIAR-FRONTEIRA.bat iniciar-fronteira.sh README.md offline-package/
+          cp docs/INSTALACAO.md offline-package/docs/
+      - name: Baixar versao para uso local
+        uses: actions/upload-artifact@v4
+        with:
+          name: fronteira-offline
+          path: offline-package/
+          retention-days: 30
+      - name: Baixar arquivos para hospedagem estatica
+        uses: actions/upload-artifact@v4
+        with:
+          name: fronteira-site
+          path: dist/
+          retention-days: 30

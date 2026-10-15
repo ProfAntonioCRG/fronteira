@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "Fronteira Acai & Doces - Pedidos",
+  "short_name": "Fronteira",
+  "description": "Atendimento, pedidos e painel da TV da Fronteira.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#faf5ff",
+  "theme_color": "#300720",
+  "icons": [
+    { "src": "images/app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
